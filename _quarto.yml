@@ -1,0 +1,17 @@
+project:
+  type: website
+  pre-render:
+    - cp README.md index.qmd
+  render:
+    - index.qmd
+    - example.qmd
+
+website:
+  site-url: "https://m.canouil.dev/quarto-portable-links"
+  navbar:
+    title: "Portable Links"
+    left:
+      - text: "Home"
+        href: index.qmd
+      - text: "Example"
+        href: example.qmd

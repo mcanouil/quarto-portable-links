@@ -1,13 +1,29 @@
 ---
 title: "Portable Links"
 subtitle: "Quarto Extension"
-author: "Mickaël Canouil"
-format: html
-website:
-  site-url: "https://example.com/my-site"
+author:
+  - name: "Mickaël CANOUIL, _Ph.D._"
+    orcid: "0000-0002-3396-4549"
+    url: "https://mickael.canouil.fr"
+format:
+  html:
+    output-file: example
+    embed-resources: true
+  typst:
+    output-file: example-typst
+    papersize: a4
+    linkcolor: "#b22222"
+    margin:
+      x: 2.5cm
+      y: 2.5cm
+format-links:
+  - html
+  - typst
 filters:
   - portable-links
 ---
+
+See the [extension overview](index.qmd) for installation and usage.
 
 ## What it does
 
@@ -21,22 +37,32 @@ This page renders to HTML, where relative cross-page links already work, so the 
 
 These relative links are rewritten in non-HTML formats:
 
-- A page link: [methods page](methods.qmd).
-- An anchored link: [appendix notes](appendix.html#notes).
-- A nested path: [chapter two](chapters/02-intro.qmd).
+- A page link: `[methods page](methods.qmd)`.
+- An anchored link: `[appendix notes](appendix.html#notes)`.
+- A nested path: `[chapter two](chapters/02-intro.qmd)`.
 
 These links are never rewritten:
 
-- An external link: [Quarto](https://quarto.org).
-- An in-page anchor: [jump to top](#what-it-does).
-- An email link: [contact](mailto:hello@example.com).
+- An external link: `[Quarto](https://quarto.org)`.
+- An in-page anchor: `[jump to top](#what-it-does)`.
+- An email link: `[contact](mailto:hello@example.com)`.
 
 ## Before and after
 
-With `site-url: "https://example.com/my-site"`, a non-HTML render produces:
+With this project's `site-url`, a non-HTML render produces:
 
-| Source                       | Rewritten target                                       |
-| ---------------------------- | ------------------------------------------------------ |
-| `methods.qmd`                | `https://example.com/my-site/methods.html`             |
-| `appendix.html#notes`        | `https://example.com/my-site/appendix.html#notes`      |
-| `chapters/02-intro.qmd`      | `https://example.com/my-site/chapters/02-intro.html`   |
+| Source                  | Rewritten target                                                   |
+| ----------------------- | ------------------------------------------------------------------ |
+| `methods.qmd`           | `https://m.canouil.dev/quarto-portable-links/methods.html`         |
+| `appendix.html#notes`   | `https://m.canouil.dev/quarto-portable-links/appendix.html#notes`  |
+| `chapters/02-intro.qmd` | `https://m.canouil.dev/quarto-portable-links/chapters/02-intro.html` |
+
+::: {.content-visible when-format="typst"}
+
+In this Typst output the filter has rewritten the links, so they resolve to the live site:
+
+- [methods page](methods.qmd).
+- [appendix notes](appendix.html#notes).
+- [chapter two](chapters/02-intro.qmd).
+
+:::
