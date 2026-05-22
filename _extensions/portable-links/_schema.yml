@@ -1,13 +1,9 @@
-# _schema.yml for "portable-links" filter extension
-# Describes options for IDE tooling and runtime validation.
+# Schema for the portable-links extension
+$schema: https://m.canouil.dev/quarto-wizard/assets/schema/v2/extension-schema.json
 
-# Extension-level metadata options.
-# Configured in _quarto.yml, _metadata.yml, or document front matter:
-#   extensions:
-#     portable-links:
-#       enabled: true
 options:
   enabled:
     type: boolean
     default: true
-    description: "Enable or disable cross-page link rewriting."
+    title: Enable portable links
+    description: Whether the filter rewrites relative cross-page links to absolute site-url links; set to false to disable it.
