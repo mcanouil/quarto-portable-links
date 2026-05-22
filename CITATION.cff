@@ -3,9 +3,11 @@ title: "Portable Links Extension for Quarto"
 message: "If you use this project, please cite it as below."
 type: software
 authors:
-  - name: "Mickaël Canouil"
+  - family-names: "Canouil"
+    given-names: "Mickaël"
+    orcid: "https://orcid.org/0000-0002-3396-4549"
 repository-code: "https://github.com/mcanouil/quarto-portable-links"
-url: "https://mcanouil.github.io/quarto-portable-links/"
+url: "https://m.canouil.dev/quarto-portable-links/"
 license: "MIT License"
 date-released: "2026-05-22"
 version: 0.0.0
