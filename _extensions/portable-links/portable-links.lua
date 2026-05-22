@@ -3,7 +3,6 @@
 --- @license MIT License
 --- @copyright 2026 Mickaël Canouil
 --- @author Mickaël Canouil
---- @version 0.0.0
 --- @brief Rewrite relative cross-page links to absolute site-url links.
 --- @description In non-HTML output formats, relative links to other pages
 --- in a Quarto website or book project are broken because the target pages
