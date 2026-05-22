@@ -6,11 +6,8 @@ author:
     orcid: "0000-0002-3396-4549"
     url: "https://mickael.canouil.fr"
 format:
-  html:
-    output-file: example
-    embed-resources: true
+  html: default
   typst:
-    output-file: example-typst
     papersize: a4
     linkcolor: "#b22222"
     margin:
