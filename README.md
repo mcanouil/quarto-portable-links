@@ -1,20 +1,11 @@
-<!--
-AGENT GUIDELINES:
-This README is the primary documentation for the extension.
-Update placeholder content with actual extension details.
-
-Required updates:
-1. Replace %%placeholders%% with actual values.
-2. Write a clear description explaining what the filter does.
-3. Document the filter's div/span classes or other syntax.
-4. Document all filter options in the Configuration table.
-5. Add rendered output links to the Example section.
-6. Update or remove the Acknowledgements section.
--->
-
 # Portable Links
 
-A Quarto extension.
+A Quarto extension that rewrites relative cross-page links to absolute `site-url` links in non-HTML output formats, so they keep working away from the rendered HTML site.
+
+In a Quarto website or book, relative links such as `[other page](other.qmd)` resolve only within the HTML site.
+When the same document is rendered to PDF, DOCX, Typst, or another non-HTML format, those targets do not exist alongside the output and the links break.
+This filter rewrites them to absolute URLs built from the project's `site-url`, pointing readers to the live HTML site.
+HTML and HTML-based formats (for example `revealjs`) are left untouched because their relative cross-page links already resolve.
 
 ## Installation
 
@@ -27,6 +18,14 @@ If you are using version control, you will want to check in this directory.
 
 ## Usage
 
+The filter relies on the project's `site-url`.
+Set it under `website` or `book` in `_quarto.yml`:
+
+```yaml
+website:
+  site-url: "https://example.com/my-site"
+```
+
 To use the extension, add the following to your document's front matter:
 
 ```yaml
@@ -34,49 +33,48 @@ filters:
   - portable-links
 ```
 
-For timing control, specify the filter path:
-
-```yaml
-filters:
-  - path: portable-links
-    at: pre-quarto
-```
-
-Then use the filter in your document:
-
-<!-- TODO: Update with actual filter syntax -->
+Then write relative cross-page links as usual:
 
 ```markdown
-::: {.portable-links}
-Content to be processed by the filter.
-:::
+See the [methods page](methods.qmd) and [the appendix](appendix.html#notes).
 ```
+
+When rendered to a non-HTML format, those links become absolute, for example `https://example.com/my-site/methods.html` and `https://example.com/my-site/appendix.html#notes`.
+
+A link is rewritten when its target:
+
+- points to a `.qmd` or `.html` file, optionally with a `#fragment` or `?query`.
+- is relative (no URI scheme such as `https:` or `mailto:`, and not a protocol-relative `//host` URL).
+- is not a pure in-page anchor (`#section`).
+
+Rewriting normalises `.qmd` targets to `.html` and strips a leading `./`.
 
 ## Configuration
 
-Configure the filter in your document's front matter:
+Disable the filter for a document or project via the front matter:
 
 ```yaml
 extensions:
   portable-links:
-    option1: value1
+    enabled: false
 ```
 
 ### Options
 
-<!-- TODO: Document all filter options -->
+| Option    | Type    | Default | Description                            |
+| --------- | ------- | ------- | -------------------------------------- |
+| `enabled` | boolean | `true`  | Enable or disable link rewriting.      |
 
-| Option    | Type   | Default     | Description            |
-| --------- | ------ | ----------- | ---------------------- |
-| `option1` | string | `"default"` | Description of option. |
+## Limitations
+
+- A project `site-url` is required.
+  When it is missing, the filter emits a warning and leaves links unchanged.
+- HTML and HTML-based formats are intentionally skipped.
 
 ## Example
 
 Here is the source code for a minimal example: [example.qmd](example.qmd).
 
-<!-- TODO: Add rendered output links -->
-
 Rendered output:
 
 - [HTML](https://m.canouil.dev/quarto-portable-links/).
-

@@ -3,43 +3,40 @@ title: "Portable Links"
 subtitle: "Quarto Extension"
 author: "Mickaël Canouil"
 format: html
+website:
+  site-url: "https://example.com/my-site"
 filters:
   - portable-links
 ---
 
-## Basic Usage
+## What it does
 
-Apply the filter using the `portable-links` class:
+In a Quarto website or book, relative links to other pages resolve only within the HTML site.
+When the document is rendered to a non-HTML format (PDF, DOCX, Typst), those pages do not exist alongside the output and the links break.
+This filter rewrites them to absolute URLs built from the project's `site-url`.
 
-::: {.portable-links}
-This content will be processed by the filter.
-:::
+This page renders to HTML, where relative cross-page links already work, so the filter leaves them untouched.
 
-## With Options
+## Cross-page links
 
-Pass options as attributes:
+These relative links are rewritten in non-HTML formats:
 
-::: {.portable-links option1="value1"}
-This content has custom options applied.
-:::
+- A page link: [methods page](methods.qmd).
+- An anchored link: [appendix notes](appendix.html#notes).
+- A nested path: [chapter two](chapters/02-intro.qmd).
 
-## Multiple Options
+These links are never rewritten:
 
-Combine multiple options:
+- An external link: [Quarto](https://quarto.org).
+- An in-page anchor: [jump to top](#what-it-does).
+- An email link: [contact](mailto:hello@example.com).
 
-::: {.portable-links option1="value1" option2="value2"}
-This content has multiple options applied.
-:::
+## Before and after
 
-## Nested Content
+With `site-url: "https://example.com/my-site"`, a non-HTML render produces:
 
-The filter handles nested content:
-
-::: {.portable-links}
-### Heading Inside Filter
-
-- List item 1.
-- List item 2.
-
-Paragraph with **bold** and *italic* text.
-:::
+| Source                       | Rewritten target                                       |
+| ---------------------------- | ------------------------------------------------------ |
+| `methods.qmd`                | `https://example.com/my-site/methods.html`             |
+| `appendix.html#notes`        | `https://example.com/my-site/appendix.html#notes`      |
+| `chapters/02-intro.qmd`      | `https://example.com/my-site/chapters/02-intro.html`   |

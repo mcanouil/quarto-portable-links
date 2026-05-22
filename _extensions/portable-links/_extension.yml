@@ -2,6 +2,7 @@ title: Portable Links
 author: Mickaël Canouil
 version: 0.0.0
 quarto-required: ">=1.6"
+description: Rewrite relative cross-page links to absolute site-url links for non-HTML formats.
 contributes:
   filters:
     - portable-links.lua
