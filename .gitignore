@@ -1,4 +1,5 @@
 _site/
+index.qmd
 docs/_site/
 docs/_variables.yml
 docs/_changelog-content.md
@@ -8,3 +9,6 @@ docs/api/*.qmd
 .quarto/
 
 /.luarc.json
+
+/.quarto/
+**/*.quarto_ipynb
