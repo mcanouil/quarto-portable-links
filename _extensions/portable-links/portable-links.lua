@@ -9,8 +9,11 @@
 --- in a Quarto website or book project are broken because the target pages
 --- do not exist alongside the rendered output. This filter rewrites those
 --- links to absolute URLs built from the project's site-url, so readers can
---- follow them to the live HTML site. HTML and HTML-based formats are left
---- untouched because their relative cross-page links already resolve.
+--- follow them to the live HTML site. HTML slide formats (revealjs, slidy,
+--- s5, dzslides, slideous) are self-contained decks where cross-page links
+--- do not resolve either, so they are rewritten too. Plain HTML, format
+--- extensions built on the html base format, and epub are left untouched
+--- because their relative cross-page links already resolve.
 
 --- Extension name constant
 local EXTENSION_NAME = 'portable-links'
@@ -37,6 +40,18 @@ local function is_disabled(meta)
     return false
   end
   return pandoc.utils.stringify(config['enabled']) == 'false'
+end
+
+--- Check whether the current output is an HTML-based slide format.
+--- These decks are single self-contained outputs, so relative cross-page
+--- links do not resolve and must be rewritten like other non-HTML formats.
+--- @return boolean True for revealjs, slidy, s5, dzslides, or slideous
+local function is_html_slides()
+  return quarto.doc.is_format('revealjs')
+    or quarto.doc.is_format('slidy')
+    or quarto.doc.is_format('s5')
+    or quarto.doc.is_format('dzslides')
+    or quarto.doc.is_format('slideous')
 end
 
 --- Read site-url from QUARTO_EXECUTE_INFO project metadata.
@@ -125,12 +140,13 @@ end
 return {
   {
     --- Resolve site-url from project metadata.
-    --- Skips entirely for HTML and HTML-based formats where cross-page links
-    --- already work, and when the filter is disabled.
+    --- Skips entirely for plain HTML, html-based format extensions, and epub
+    --- where cross-page links already work, and when the filter is disabled.
+    --- HTML slide formats are processed like other non-HTML formats.
     --- @param meta table The document metadata table
     --- @return nil
     Meta = function(meta)
-      if quarto.doc.is_format('html') then return nil end
+      if quarto.doc.is_format('html') and not is_html_slides() then return nil end
       if is_disabled(meta) then return nil end
 
       site_url = get_site_url_from_execute_info()
