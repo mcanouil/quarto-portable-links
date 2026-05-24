@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### New Features
+
+- feat: Preserve a subpath in `site-url` (e.g. a GitHub Pages project subpath) when rewriting links, so absolute URLs keep the subdirectory.
+
 ## 0.1.0 (2026-05-22)
 
 ### New Features
