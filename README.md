@@ -48,7 +48,7 @@ A link is rewritten when its target:
 - is relative (no URI scheme such as `https:` or `mailto:`, and not a protocol-relative `//host` URL).
 - is not a pure in-page anchor (`#section`).
 
-Rewriting normalises `.qmd` targets to `.html` and strips a leading `./`.
+Rewriting normalises `.qmd` targets to `.html` and strips a leading `./` or `/`.
 
 ## Configuration
 
