@@ -46,7 +46,6 @@ These links are never rewritten:
 
 ## Before and after
 
-This project's `site-url` includes the `/quarto-portable-links` subpath, which the filter preserves when building the absolute URLs.
 With this project's `site-url`, a non-HTML render produces:
 
 | Source                  | Rewritten target                                                   |

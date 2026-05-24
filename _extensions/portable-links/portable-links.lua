@@ -119,40 +119,17 @@ local function is_relative_page_link(target)
   return false
 end
 
---- Split a site-url into its origin and path components.
---- The origin is the scheme and authority (e.g. https://user.github.io),
---- and the path is any subdirectory component (e.g. /my-project). A
---- site-url without a path yields an empty path. Leading and trailing
---- slashes are stripped from the path so it can be rejoined cleanly.
---- @param url string The site-url to split
---- @return string origin The scheme and authority
---- @return string path The subdirectory path without leading or trailing slashes
-local function split_site_url(url)
-  local origin, path = url:match('^(%a[%a%d+%-%.]*://[^/]*)(.*)$')
-  if not origin then
-    return url:gsub('/$', ''), ''
-  end
-  path = path:gsub('^/+', ''):gsub('/+$', '')
-  return origin, path
-end
-
 --- Rewrite a relative page link target to an absolute URL.
 --- Normalises .qmd extensions to .html, strips leading ./ and /, and
---- joins the target onto the site-url, preserving any subdirectory path
---- in the site-url (e.g. a GitHub Pages project subpath). Slashes are
---- normalised so the result has no double // and no missing /.
+--- prepends the site-url.
 --- @param target string The original relative link target
 --- @param base_url string The site-url to prepend
 --- @return string The rewritten absolute URL
 local function rewrite_target(target, base_url)
   local rewritten = target:gsub('%.qmd([#?])', '.html%1'):gsub('%.qmd$', '.html')
   rewritten = rewritten:gsub('^%./', ''):gsub('^/+', '')
-
-  local origin, path = split_site_url(base_url)
-  if path == '' then
-    return origin .. '/' .. rewritten
-  end
-  return origin .. '/' .. path .. '/' .. rewritten
+  local separator = base_url:match('/$') and '' or '/'
+  return base_url .. separator .. rewritten
 end
 
 -- ============================================================================

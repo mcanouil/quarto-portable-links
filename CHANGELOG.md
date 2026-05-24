@@ -2,9 +2,9 @@
 
 ## Unreleased
 
-### New Features
+### Bug Fixes
 
-- feat: Preserve a subpath in `site-url` (e.g. a GitHub Pages project subpath) when rewriting links, so absolute URLs keep the subdirectory.
+- fix: Strip a leading `/` from root-relative targets so rewritten URLs do not contain a double slash.
 
 ## 0.1.0 (2026-05-22)
 
