@@ -9,5 +9,5 @@ authors:
 repository-code: "https://github.com/mcanouil/quarto-portable-links"
 url: "https://m.canouil.dev/quarto-portable-links/"
 license: "MIT License"
-date-released: "2026-05-22"
-version: 0.1.1
+date-released: "2026-05-24"
+version: 0.1.2

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.1.2 (2026-05-24)
+
 ### Bug Fixes
 
 - fix: Strip a leading `/` from root-relative targets so rewritten URLs do not contain a double slash.
