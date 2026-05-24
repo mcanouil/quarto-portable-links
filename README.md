@@ -42,16 +42,13 @@ See the [methods page](methods.qmd) and [the appendix](appendix.html#notes).
 
 When rendered to a non-HTML format, those links become absolute, for example `https://example.com/my-site/methods.html` and `https://example.com/my-site/appendix.html#notes`.
 
-A `site-url` with a subpath is supported, so the subdirectory is preserved in the absolute URLs.
-For a GitHub Pages project at `https://user.github.io/my-project/`, a relative `methods.qmd` is rewritten to `https://user.github.io/my-project/methods.html`.
-
 A link is rewritten when its target:
 
 - points to a `.qmd` or `.html` file, optionally with a `#fragment` or `?query`.
 - is relative (no URI scheme such as `https:` or `mailto:`, and not a protocol-relative `//host` URL).
 - is not a pure in-page anchor (`#section`).
 
-Rewriting normalises `.qmd` targets to `.html` and strips a leading `./`.
+Rewriting normalises `.qmd` targets to `.html` and strips a leading `./` or `/`.
 
 ## Configuration
 
