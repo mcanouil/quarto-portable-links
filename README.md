@@ -20,12 +20,14 @@ If you are using version control, you will want to check in this directory.
 ## Usage
 
 The filter relies on the project's `site-url`.
-Set it under `website` or `book` in `_quarto.yml`:
+Set it under `website` or `book` in the project configuration file (`_quarto.yml` or `_quarto.yaml`); it does not belong in document front matter:
 
 ```yaml
 website:
   site-url: "https://example.com/my-site"
 ```
+
+When `site-url` is missing the filter emits a warning that points back to the project configuration file and leaves links unchanged.
 
 To use the extension, add the following to your document's front matter:
 
@@ -62,16 +64,33 @@ extensions:
 
 ### Options
 
-| Option    | Type    | Default | Description                            |
-| --------- | ------- | ------- | -------------------------------------- |
-| `enabled` | boolean | `true`  | Enable or disable link rewriting.      |
+| Option                | Type             | Default | Description                                                                                 |
+| --------------------- | ---------------- | ------- | ------------------------------------------------------------------------------------------- |
+| `enabled`             | boolean          | `true`  | Enable or disable link rewriting.                                                           |
+| `extra-slide-formats` | string or list   | `[]`    | Names of extra HTML slide-format extensions to treat like the built-in slide formats.       |
+
+#### Extra slide formats
+
+Custom slide-format extensions can be added to the slide-format set on a per-document basis.
+This is useful when a custom format is built on top of `revealjs` (or another slide base) and produces a single self-contained deck.
+
+```yaml
+extensions:
+  portable-links:
+    extra-slide-formats:
+      - my-revealjs
+      - team-deck
+```
+
+Built-in slide formats (`revealjs`, `slidy`, `s5`, `dzslides`, `slideous`) are always treated as slides; `extra-slide-formats` only adds to that set.
 
 ## Limitations
 
-- A project `site-url` is required.
-  When it is missing, the filter emits a warning and leaves links unchanged.
+- A project `site-url` is required, declared in `_quarto.yml` or `_quarto.yaml` (project config), not in document front matter.
+  When it is missing, the filter emits a warning naming the expected location and leaves links unchanged.
 - Plain HTML, format extensions built on the `html` base format, and `epub` are intentionally skipped.
-  HTML slide formats (`revealjs`, `slidy`, `s5`, `dzslides`, `slideous`) are rewritten.
+  HTML slide formats (`revealjs`, `slidy`, `s5`, `dzslides`, `slideous`) are rewritten, and additional slide formats can be declared via `extra-slide-formats`.
+- A link is rewritten only when its target ends in `.qmd` or `.html`, optionally followed by `#fragment` or `?query`; suffixes such as `foo.qmd.backup` are not rewritten.
 
 ## Example
 
