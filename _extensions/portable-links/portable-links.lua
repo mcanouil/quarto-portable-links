@@ -27,10 +27,10 @@ local slide_formats = require(quarto.utils.resolve_path('_modules/slide-formats.
 --- @type string|nil The resolved site URL from project metadata
 local site_url = nil
 
---- @type table<string, boolean> Per-document set of slide formats, seeded
---- from the canonical slide-format set and extended via
---- `extensions.portable-links.extra-slide-formats`.
-local extra_slide_formats = {}
+--- @type table<string, boolean> Per-document slide-format set used by
+--- `is_html_slides`. Seeded from the canonical slide-format set and
+--- extended via `extensions.portable-links.extra-slide-formats`.
+local slide_format_set = {}
 
 -- ============================================================================
 -- HELPER FUNCTIONS (PRIVATE)
@@ -47,31 +47,25 @@ local function is_disabled(meta)
   return pandoc.utils.stringify(config['enabled']) == 'false'
 end
 
---- Read the user-declared extra slide formats from document metadata.
---- Accepts a string (single value) or a list (multiple values).
---- Empty values are ignored. The set is keyed by format name for O(1) lookup.
+--- Build the per-document slide-format set: the canonical built-in formats
+--- plus any names declared via `extensions.portable-links.extra-slide-formats`
+--- (a string or a list). Empty values are ignored.
 --- @param meta table The document metadata table
---- @return table<string, boolean> The set of additional slide-format names
-local function read_extra_slide_formats(meta)
+--- @return table<string, boolean> The slide-format set, keyed by format name
+local function build_slide_format_set(meta)
   local result = {}
-  local config = meta['extensions'] and meta['extensions'][EXTENSION_NAME]
-  if not config then return result end
+  for name in pairs(slide_formats.formats) do result[name] = true end
 
-  local extras = config['extra-slide-formats']
+  local config = meta['extensions'] and meta['extensions'][EXTENSION_NAME]
+  local extras = config and config['extra-slide-formats']
   if extras == nil then return result end
 
-  -- A single string value is treated as a one-element list.
-  if extras.t == 'MetaInlines' or type(extras) == 'string' then
-    local name = pandoc.utils.stringify(extras)
-    if name ~= '' then result[name] = true end
-    return result
-  end
+  local is_list = type(extras) == 'table' and (extras.t == 'MetaList' or extras[1] ~= nil)
+  local entries = is_list and extras or { extras }
 
-  if extras.t == 'MetaList' or (type(extras) == 'table' and #extras > 0) then
-    for _, entry in ipairs(extras) do
-      local name = pandoc.utils.stringify(entry)
-      if name ~= '' then result[name] = true end
-    end
+  for _, entry in ipairs(entries) do
+    local name = pandoc.utils.stringify(entry)
+    if name ~= '' then result[name] = true end
   end
 
   return result
@@ -80,14 +74,9 @@ end
 --- Check whether the current output is an HTML-based slide format.
 --- These decks are single self-contained outputs, so relative cross-page
 --- links do not resolve and must be rewritten like other non-HTML formats.
---- Built-in members come from the shared `_modules/slide-formats` module;
---- per-document additions come from `extra-slide-formats`.
 --- @return boolean True for any built-in or user-declared slide format
 local function is_html_slides()
-  for name in pairs(slide_formats.formats) do
-    if quarto.doc.is_format(name) then return true end
-  end
-  for name in pairs(extra_slide_formats) do
+  for name in pairs(slide_format_set) do
     if quarto.doc.is_format(name) then return true end
   end
   return false
@@ -98,35 +87,37 @@ end
 --- Workaround for https://github.com/quarto-dev/quarto-cli/issues/13029
 --- where project-level metadata (website/book) is not available in the
 --- document Meta passed to Lua filters.
---- Returns a (value, source) pair so the caller can warn on a parse-level
---- fallback distinct from a missing file.
+--- Returns a second value only when QUARTO_EXECUTE_INFO was present but
+--- could not be read or parsed, so the caller can warn before falling
+--- back to document metadata. Absent or empty files fall back silently.
 --- @return string|nil value The site-url value, or nil if unavailable
---- @return "missing"|"unreadable"|"empty"|"invalid-json"|"no-metadata"|"ok"|nil source Why the value is nil (when applicable)
+--- @return string|nil parse_error A human-readable reason when the file
+---   existed but could not be parsed, otherwise nil
 local function get_site_url_from_execute_info()
   local path = os.getenv('QUARTO_EXECUTE_INFO')
-  if not path then return nil, 'missing' end
+  if not path then return nil end
 
   local file = io.open(path, 'r')
-  if not file then return nil, 'unreadable' end
+  if not file then return nil, 'file is unreadable' end
 
   local content = file:read('*a')
   file:close()
 
-  if not content or content == '' then return nil, 'empty' end
+  if not content or content == '' then return nil end
 
   local ok, info = pcall(quarto.json.decode, content)
-  if not ok or not info then return nil, 'invalid-json' end
+  if not ok or not info then return nil, 'invalid JSON' end
 
   local format_meta = info['format'] and info['format']['metadata']
-  if not format_meta then return nil, 'no-metadata' end
+  if not format_meta then return nil end
 
   if format_meta['website'] and format_meta['website']['site-url'] then
-    return format_meta['website']['site-url'], 'ok'
+    return format_meta['website']['site-url']
   elseif format_meta['book'] and format_meta['book']['site-url'] then
-    return format_meta['book']['site-url'], 'ok'
+    return format_meta['book']['site-url']
   end
 
-  return nil, 'no-metadata'
+  return nil
 end
 
 --- Read site-url from document metadata as a fallback.
@@ -195,26 +186,22 @@ return {
     --- @return nil
     Meta = function(meta)
       -- Reset per-document state so a previous render in the same process
-      -- does not leak its site-url or extra-slide-formats into this one.
+      -- does not leak its site-url or slide-format set into this one.
       site_url = nil
-      extra_slide_formats = read_extra_slide_formats(meta)
+      slide_format_set = build_slide_format_set(meta)
 
       if is_disabled(meta) then return nil end
       if quarto.doc.is_format('html') and not is_html_slides() then return nil end
 
-      local execute_info_url, source = get_site_url_from_execute_info()
-      if execute_info_url then
-        site_url = execute_info_url
-      else
-        if source == 'invalid-json' or source == 'unreadable' then
-          log.log_warning(
-            EXTENSION_NAME,
-            "Could not parse QUARTO_EXECUTE_INFO (" .. source ..
-              "); falling back to document metadata for site-url."
-          )
-        end
-        site_url = get_site_url_from_meta(meta)
+      local execute_info_url, parse_error = get_site_url_from_execute_info()
+      if parse_error then
+        log.log_warning(
+          EXTENSION_NAME,
+          "Could not parse QUARTO_EXECUTE_INFO (" .. parse_error ..
+            "); falling back to document metadata for site-url."
+        )
       end
+      site_url = execute_info_url or get_site_url_from_meta(meta)
 
       if not site_url then
         log.log_warning(
