@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.2.0 (2026-05-31)
+
 ### Bug Fixes
 
 - fix: Warn when `QUARTO_EXECUTE_INFO` exists but cannot be parsed (unreadable file or invalid JSON), before falling back to document metadata; previously the fallback was silent and misconfiguration was hard to diagnose.
