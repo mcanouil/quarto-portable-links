@@ -11,7 +11,7 @@ Plain HTML, format extensions built on the `html` base format, and `epub` are le
 ## Installation
 
 ```bash
-quarto add mcanouil/quarto-portable-links@0.1.2
+quarto add mcanouil/quarto-portable-links@0.2.0
 ```
 
 This will install the extension under the `_extensions` subdirectory.
