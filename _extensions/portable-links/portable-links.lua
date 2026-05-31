@@ -18,6 +18,7 @@
 local EXTENSION_NAME = 'portable-links'
 
 local log = require(quarto.utils.resolve_path('_modules/logging.lua'):gsub('%.lua$', ''))
+local slide_formats = require(quarto.utils.resolve_path('_modules/slide-formats.lua'):gsub('%.lua$', ''))
 
 -- ============================================================================
 -- MODULE-LEVEL VARIABLES
@@ -44,13 +45,12 @@ end
 --- Check whether the current output is an HTML-based slide format.
 --- These decks are single self-contained outputs, so relative cross-page
 --- links do not resolve and must be rewritten like other non-HTML formats.
---- @return boolean True for revealjs, slidy, s5, dzslides, or slideous
+--- @return boolean True for any built-in slide format
 local function is_html_slides()
-  return quarto.doc.is_format('revealjs')
-    or quarto.doc.is_format('slidy')
-    or quarto.doc.is_format('s5')
-    or quarto.doc.is_format('dzslides')
-    or quarto.doc.is_format('slideous')
+  for name in pairs(slide_formats.formats) do
+    if quarto.doc.is_format(name) then return true end
+  end
+  return false
 end
 
 --- Read site-url from QUARTO_EXECUTE_INFO project metadata.
@@ -58,13 +58,18 @@ end
 --- Workaround for https://github.com/quarto-dev/quarto-cli/issues/13029
 --- where project-level metadata (website/book) is not available in the
 --- document Meta passed to Lua filters.
---- @return string|nil The site-url value, or nil if unavailable
+--- Returns a second value only when QUARTO_EXECUTE_INFO was present but
+--- could not be read or parsed, so the caller can warn before falling
+--- back to document metadata. Absent or empty files fall back silently.
+--- @return string|nil value The site-url value, or nil if unavailable
+--- @return string|nil parse_error A human-readable reason when the file
+---   existed but could not be parsed, otherwise nil
 local function get_site_url_from_execute_info()
   local path = os.getenv('QUARTO_EXECUTE_INFO')
   if not path then return nil end
 
   local file = io.open(path, 'r')
-  if not file then return nil end
+  if not file then return nil, 'file is unreadable' end
 
   local content = file:read('*a')
   file:close()
@@ -72,7 +77,7 @@ local function get_site_url_from_execute_info()
   if not content or content == '' then return nil end
 
   local ok, info = pcall(quarto.json.decode, content)
-  if not ok or not info then return nil end
+  if not ok or not info then return nil, 'invalid JSON' end
 
   local format_meta = info['format'] and info['format']['metadata']
   if not format_meta then return nil end
@@ -107,6 +112,9 @@ end
 --- Check whether a link target is a relative cross-page link.
 --- Returns true for targets that point to .html or .qmd files
 --- without an absolute URI scheme.
+--- The `.qmd`/`.html` match is anchored to end-of-path (just before an
+--- optional `#fragment` or `?query`, or at end-of-string) so a target such
+--- as `foo.qmd.backup` is not mistaken for a `.qmd` cross-page link.
 --- @param target string The link target URL
 --- @return boolean True if the target is a relative page link
 local function is_relative_page_link(target)
@@ -114,8 +122,11 @@ local function is_relative_page_link(target)
   if target:match('^#') then return false end
   if target:match('^%a[%a%d+%-%.]*:') then return false end
   if target:match('^//') then return false end
-  if target:match('%.html[#?]') or target:match('%.html$') then return true end
-  if target:match('%.qmd[#?]') or target:match('%.qmd$') then return true end
+  -- A path segment ending in `.qmd` or `.html`, optionally followed by `#`
+  -- or `?`, and otherwise at end-of-string. The trailing alternation guards
+  -- against suffixes such as `.qmd.backup` matching mid-path.
+  if target:match('%.html$') or target:match('%.html[#?]') then return true end
+  if target:match('%.qmd$') or target:match('%.qmd[#?]') then return true end
   return false
 end
 
@@ -145,16 +156,30 @@ return {
     --- @param meta table The document metadata table
     --- @return nil
     Meta = function(meta)
-      if quarto.doc.is_format('html') and not is_html_slides() then return nil end
+      -- Reset per-document state so a previous render in the same process
+      -- does not leak its site-url into this one.
+      site_url = nil
+
       if is_disabled(meta) then return nil end
+      if quarto.doc.is_format('html') and not is_html_slides() then return nil end
 
-      site_url = get_site_url_from_execute_info()
-      if not site_url then
-        site_url = get_site_url_from_meta(meta)
+      local execute_info_url, parse_error = get_site_url_from_execute_info()
+      if parse_error then
+        log.log_warning(
+          EXTENSION_NAME,
+          "Could not parse QUARTO_EXECUTE_INFO (" .. parse_error ..
+            "); falling back to document metadata for site-url."
+        )
       end
+      site_url = execute_info_url or get_site_url_from_meta(meta)
 
       if not site_url then
-        log.log_warning(EXTENSION_NAME, 'site-url not found in project metadata; links left unchanged.')
+        log.log_warning(
+          EXTENSION_NAME,
+          "site-url not found in project metadata; links left unchanged. " ..
+            "Set 'site-url' under 'website' or 'book' in '_quarto.yml' (project config), " ..
+            "not in the document front matter."
+        )
       end
 
       return nil
