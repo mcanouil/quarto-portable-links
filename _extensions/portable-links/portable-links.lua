@@ -27,11 +27,6 @@ local slide_formats = require(quarto.utils.resolve_path('_modules/slide-formats.
 --- @type string|nil The resolved site URL from project metadata
 local site_url = nil
 
---- @type table<string, boolean> Per-document slide-format set used by
---- `is_html_slides`. Seeded from the canonical slide-format set and
---- extended via `extensions.portable-links.extra-slide-formats`.
-local slide_format_set = {}
-
 -- ============================================================================
 -- HELPER FUNCTIONS (PRIVATE)
 -- ============================================================================
@@ -47,36 +42,12 @@ local function is_disabled(meta)
   return pandoc.utils.stringify(config['enabled']) == 'false'
 end
 
---- Build the per-document slide-format set: the canonical built-in formats
---- plus any names declared via `extensions.portable-links.extra-slide-formats`
---- (a string or a list). Empty values are ignored.
---- @param meta table The document metadata table
---- @return table<string, boolean> The slide-format set, keyed by format name
-local function build_slide_format_set(meta)
-  local result = {}
-  for name in pairs(slide_formats.formats) do result[name] = true end
-
-  local config = meta['extensions'] and meta['extensions'][EXTENSION_NAME]
-  local extras = config and config['extra-slide-formats']
-  if extras == nil then return result end
-
-  local is_list = type(extras) == 'table' and (extras.t == 'MetaList' or extras[1] ~= nil)
-  local entries = is_list and extras or { extras }
-
-  for _, entry in ipairs(entries) do
-    local name = pandoc.utils.stringify(entry)
-    if name ~= '' then result[name] = true end
-  end
-
-  return result
-end
-
 --- Check whether the current output is an HTML-based slide format.
 --- These decks are single self-contained outputs, so relative cross-page
 --- links do not resolve and must be rewritten like other non-HTML formats.
---- @return boolean True for any built-in or user-declared slide format
+--- @return boolean True for any built-in slide format
 local function is_html_slides()
-  for name in pairs(slide_format_set) do
+  for name in pairs(slide_formats.formats) do
     if quarto.doc.is_format(name) then return true end
   end
   return false
@@ -186,9 +157,8 @@ return {
     --- @return nil
     Meta = function(meta)
       -- Reset per-document state so a previous render in the same process
-      -- does not leak its site-url or slide-format set into this one.
+      -- does not leak its site-url into this one.
       site_url = nil
-      slide_format_set = build_slide_format_set(meta)
 
       if is_disabled(meta) then return nil end
       if quarto.doc.is_format('html') and not is_html_slides() then return nil end

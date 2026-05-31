@@ -7,10 +7,3 @@ options:
     default: true
     title: Enable portable links
     description: Whether the filter rewrites relative cross-page links to absolute site-url links; set to false to disable it.
-  extra-slide-formats:
-    type: array
-    items:
-      type: string
-    default: []
-    title: Extra slide formats
-    description: Names of additional HTML slide-format extensions that should be treated like the built-in slide formats (revealjs, slidy, s5, dzslides, slideous) when deciding whether to rewrite cross-page links; useful when a custom format is built on a slide base format.
