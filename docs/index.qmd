@@ -1,0 +1,85 @@
+---
+title: "Portable Links"
+subtitle: "Relative links that still work once the site is left behind."
+description: "What the portable-links extension is for, how to enable it, and what a relative cross-page link becomes in a PDF."
+authors:
+  - name: "Mickaël CANOUIL, _Ph.D._"
+    orcid: "0000-0002-3396-4549"
+    url: "https://mickael.canouil.fr"
+---
+
+In a Quarto website or book, `[the methods](methods.qmd)` resolves because the reader is on the site and the other page is next to it.
+Render the same document to PDF, Word, Typst, or a slide deck, and the file travels on its own: the target is not there, and the link is dead.
+
+`portable-links` rewrites those links for the formats that leave the site behind.
+A relative cross-page link becomes an absolute one built from the project's `site-url`, so it points at the published page instead of a file that is not there.
+
+## Installation
+
+```bash
+quarto add {{< var extension.reference >}}
+```
+
+This will install the extension under the `_extensions` subdirectory.
+If you are using version control, you will want to check in this directory.
+
+Or install it from your editor with [Quarto Wizard](https://m.canouil.dev/quarto-wizard):
+
+::: {.btn-group role="group" aria-label="Quarto Wizard installer options"}
+
+[Visual Studio Code](vscode://mcanouil.quarto-wizard/install?repo={{< var extension.wizard-reference >}}){.btn .btn-outline-primary title="Install {{< var extension.reference >}} in Visual Studio Code using the Quarto Wizard extension."}
+[Positron](positron://mcanouil.quarto-wizard/install?repo={{< var extension.wizard-reference >}}){.btn .btn-outline-primary title="Install {{< var extension.reference >}} in Positron using the Quarto Wizard extension."}
+[VSCodium](vscodium://mcanouil.quarto-wizard/install?repo={{< var extension.wizard-reference >}}){.btn .btn-outline-primary title="Install {{< var extension.reference >}} in VSCodium using the Quarto Wizard extension."}
+
+:::
+
+## Quick start
+
+The filter needs the project's `site-url`, which belongs in the project configuration rather than a document:
+
+```yaml
+website:
+  site-url: "https://example.com/my-site"
+```
+
+Enable the filter:
+
+```yaml
+filters:
+  - portable-links
+```
+
+Then write links exactly as you would for the website:
+
+```markdown
+See the [methods page](methods.qmd) and [the appendix](appendix.html#notes).
+```
+
+In HTML nothing changes.
+In a PDF, a Word file, or a deck, those become `https://example.com/my-site/methods.html` and `https://example.com/my-site/appendix.html#notes`.
+
+## Seeing it work
+
+This site is HTML, so the filter deliberately leaves its pages alone.
+The [Typst preview](preview.pdf) is the same site rendered to a format that does leave it behind, and its links point back here.
+
+See the [Reference](reference.qmd) for the rewriting rules, and the [Examples](examples.qmd) for each of them.
+
+## Where it works
+
+| Rewritten | Left alone |
+| --- | --- |
+| PDF, LaTeX, Typst, Word, PowerPoint, and every other non-HTML format. | Plain HTML, format extensions built on `html`, and `epub`. |
+| The HTML slide formats: `revealjs`, `slidy`, `s5`, `dzslides`, `slideous`. | |
+
+: Which formats the filter touches. {.striped .hover tbl-colwidths="[50,50]"}
+
+A slide deck is self-contained even though it is HTML, so cross-page links do not resolve in it and it is rewritten too.
+
+## Links
+
+- [Reference](reference.qmd) for the rewriting rules.
+- [Examples](examples.qmd) for what each link becomes.
+- [Typst preview](preview.pdf) for the filter's output.
+- [Changelog](changelog.qmd) for what each release changed.
+- [Source and issues](https://github.com/mcanouil/quarto-portable-links) on GitHub.

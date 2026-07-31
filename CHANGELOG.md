@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### Documentation
+
+- docs: Add a documentation website under `docs/`, built on the `atelier` project type and published to <https://m.canouil.dev/quarto-portable-links/>, including a Typst rendering of the site whose links the filter rewrites back to it.
+- docs: Trim `README.md` to a landing page pointing at the website, and `example.qmd` to a short starting point to copy.
+- docs: Add the Pages workflow, which renders `docs/` on pull requests and deploys it from the release tag.
+- docs: Add the Quarto Extensions Updates workflow, scanning `docs` for the website's own dependencies.
+
+### Bug Fixes
+
+- fix: Anchor the `index.qmd` rule in `.gitignore` to the repository root. Unanchored, it also matched `docs/index.qmd`, the documentation website's home page.
+
 ## 0.2.0 (2026-05-31)
 
 ### Bug Fixes

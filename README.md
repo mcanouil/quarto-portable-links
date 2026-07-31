@@ -4,9 +4,7 @@ A Quarto extension that rewrites relative cross-page links to absolute `site-url
 
 In a Quarto website or book, relative links such as `[other page](other.qmd)` resolve only within the HTML site.
 When the same document is rendered to PDF, DOCX, Typst, an HTML slide deck, or another format, those targets do not exist alongside the output and the links break.
-This filter rewrites them to absolute URLs built from the project's `site-url`, pointing readers to the live HTML site.
-HTML slide formats (`revealjs`, `slidy`, `s5`, `dzslides`, `slideous`) are self-contained decks where cross-page links do not resolve, so they are rewritten too.
-Plain HTML, format extensions built on the `html` base format, and `epub` are left untouched because their relative cross-page links already resolve.
+This filter rewrites them to absolute URLs built from the project's `site-url`.
 
 ## Installation
 
@@ -17,69 +15,12 @@ quarto add mcanouil/quarto-portable-links@0.2.0
 This will install the extension under the `_extensions` subdirectory.
 If you are using version control, you will want to check in this directory.
 
-## Usage
+## Documentation
 
-The filter relies on the project's `site-url`.
-Set it under `website` or `book` in the project configuration file (`_quarto.yml` or `_quarto.yaml`); it does not belong in document front matter:
+The full documentation lives at <https://m.canouil.dev/quarto-portable-links/>: the rewriting rules, which formats are affected, and a Typst rendering of the site itself whose links point back at it.
 
-```yaml
-website:
-  site-url: "https://example.com/my-site"
-```
+[`example.qmd`](example.qmd) is a short, standalone starting point you can copy.
 
-When `site-url` is missing the filter emits a warning that points back to the project configuration file and leaves links unchanged.
+## Licence
 
-To use the extension, add the following to your document's front matter:
-
-```yaml
-filters:
-  - portable-links
-```
-
-Then write relative cross-page links as usual:
-
-```markdown
-See the [methods page](methods.qmd) and [the appendix](appendix.html#notes).
-```
-
-When rendered to a non-HTML format, those links become absolute, for example `https://example.com/my-site/methods.html` and `https://example.com/my-site/appendix.html#notes`.
-
-A link is rewritten when its target:
-
-- points to a `.qmd` or `.html` file, optionally with a `#fragment` or `?query`.
-- is relative (no URI scheme such as `https:` or `mailto:`, and not a protocol-relative `//host` URL).
-- is not a pure in-page anchor (`#section`).
-
-Rewriting normalises `.qmd` targets to `.html` and strips a leading `./` or `/`.
-
-## Configuration
-
-Disable the filter for a document or project via the front matter:
-
-```yaml
-extensions:
-  portable-links:
-    enabled: false
-```
-
-### Options
-
-| Option    | Type    | Default | Description                       |
-| --------- | ------- | ------- | --------------------------------- |
-| `enabled` | boolean | `true`  | Enable or disable link rewriting. |
-
-## Limitations
-
-- A project `site-url` is required, declared in `_quarto.yml` or `_quarto.yaml` (project config), not in document front matter.
-  When it is missing, the filter emits a warning naming the expected location and leaves links unchanged.
-- Plain HTML, format extensions built on the `html` base format, and `epub` are intentionally skipped.
-  HTML slide formats (`revealjs`, `slidy`, `s5`, `dzslides`, `slideous`) are rewritten.
-- A link is rewritten only when its target ends in `.qmd` or `.html`, optionally followed by `#fragment` or `?query`; suffixes such as `foo.qmd.backup` are not rewritten.
-
-## Example
-
-Here is the source code for a minimal example: [example.qmd](example.qmd).
-
-Rendered output:
-
-- [HTML](https://m.canouil.dev/quarto-portable-links/).
+[MIT](https://github.com/mcanouil/quarto-portable-links?tab=MIT-1-ov-file#readme).
