@@ -19,9 +19,12 @@ website:
 ```
 
 The filter builds every absolute link from this value, so it is required.
-It belongs under `website` or `book` in `_quarto.yml` or `_quarto.yaml`, and is not read from document front matter.
+It belongs under `website` or `book` in `_quarto.yml` or `_quarto.yaml`, which is where a project keeps it.
 
-When it is missing, the filter warns, names the file it expected to find it in, and leaves every link unchanged.
+Quarto hides the project's `website` and `book` blocks from Lua filters, so the filter reads the value from the render information Quarto passes alongside them.
+A `website` or `book` block in a single document's own front matter is read as a fallback, which covers a document rendered outside a project.
+
+When neither carries a `site-url`, the filter warns and leaves every link unchanged.
 
 ## Options
 
@@ -56,6 +59,8 @@ Rewriting then:
 | --- | --- |
 | `methods.qmd` | `https://example.com/my-site/methods.html` |
 | `./methods.qmd` | `https://example.com/my-site/methods.html` |
+| `/methods.qmd` | `https://example.com/my-site/methods.html` |
+| `../other/methods.qmd` | `https://example.com/my-site/../other/methods.html` |
 | `appendix.html#notes` | `https://example.com/my-site/appendix.html#notes` |
 | `search.html?q=term` | `https://example.com/my-site/search.html?q=term` |
 | `#section` | unchanged |
@@ -84,3 +89,5 @@ The HTML slide formats are rewritten despite being HTML, because a deck is a sin
 - A project `site-url` is required. Without it the filter warns and does nothing.
 - Only `.qmd` and `.html` targets are rewritten, so a link to a data file or an image is left as written.
 - The suffix must end the path: `notes.qmd.backup` is not a cross-page link and is not rewritten.
+- A leading `/` is treated as relative to `site-url`, not to the host, so a link to another site on the same domain is rewritten into this one.
+- A `../` segment is carried into the URL rather than resolved, and the reader's browser resolves it against `site-url`.
