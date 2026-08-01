@@ -63,6 +63,8 @@ In a PDF, a Word file, or a deck, those become `https://example.com/my-site/meth
 This site is HTML, so the filter deliberately leaves its pages alone.
 The [Typst preview](preview.pdf) is the same site rendered to a format that does leave it behind, and its links point back here.
 
+![](preview.pdf){.embed-art loading="lazy" title="The site rendered to Typst, with its links made absolute"}
+
 See the [Reference](reference.qmd) for the rewriting rules, and the [Examples](examples.qmd) for each of them.
 
 ## Where it works
