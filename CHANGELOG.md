@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.2.1 (2026-08-01)
+
 ### Documentation
 
 - docs: Add a documentation website under `docs/`, built on the `atelier` project type and published to <https://m.canouil.dev/quarto-portable-links/>, including a Typst rendering of the site whose links the filter rewrites back to it.
