@@ -1,0 +1,21 @@
+---
+title: "Portable Links in Typst"
+subtitle: "The same links, rendered to a format that leaves the site behind."
+format:
+  typst:
+    papersize: a4
+    margin:
+      x: 2.5cm
+      y: 2.5cm
+---
+
+This page is part of the documentation site and is rendered to Typst, so the filter applies to it.
+
+The links below are written relative, exactly as they are written on the HTML pages.
+In this PDF they point at the published site instead, because nothing here can resolve them locally.
+
+See [the reference](reference.qmd), [the examples](examples.qmd#rewriting-rules), and [the home page](index.qmd).
+
+An absolute link, such as the one to [Quarto](https://quarto.org), is left alone, and so is a pure in-page anchor.
+
+Compare the same three links on the HTML pages: there they stay relative, because the site can resolve them.

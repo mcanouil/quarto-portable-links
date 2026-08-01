@@ -1,0 +1,68 @@
+---
+title: "Examples"
+subtitle: "What each link becomes, and where."
+description: "Relative cross-page links as written on this site, alongside the absolute links the filter produces in a format that leaves the site behind."
+---
+
+This site is HTML, so the filter leaves its pages alone: every link below stays relative here.
+The [Typst preview](preview.pdf) is the same site rendered to a format that does leave it behind, and every one of these links is absolute in it.
+
+That contrast is the whole of the extension: nothing changes where the site can resolve a link, and everything changes where it cannot.
+
+## Rewriting rules
+
+The site sets its URL in `_quarto.yml`, as the filter requires:
+
+```yaml
+website:
+  site-url: https://m.canouil.dev/quarto-portable-links
+```
+
+These three links are written relative on this page and in the preview:
+
+- [the reference](reference.qmd)
+- [the examples](examples.qmd#rewriting-rules)
+- [the home page](index.qmd)
+
+Open the [preview](preview.pdf) and the same three read:
+
+| Written | In the preview |
+| --- | --- |
+| `reference.qmd` | `https://m.canouil.dev/quarto-portable-links/reference.html` |
+| `examples.qmd#rewriting-rules` | `https://m.canouil.dev/quarto-portable-links/examples.html#rewriting-rules` |
+| `index.qmd` | `https://m.canouil.dev/quarto-portable-links/index.html` |
+
+: The three links on this page, as the filter writes them for Typst. {.striped .hover tbl-colwidths="[38,62]"}
+
+The `.qmd` suffix becomes `.html`, and the fragment survives.
+
+## Links left alone
+
+Not everything relative is a cross-page link.
+
+| Written | Why it is untouched |
+| --- | --- |
+| `#rewriting-rules` | A pure in-page anchor, which resolves in every format. |
+| `https://quarto.org` | Absolute already. |
+| `mailto:someone@example.com` | Carries a scheme. |
+| `//example.com/page.html` | Protocol-relative, so it is not project-relative. |
+| `data.csv` | Not a `.qmd` or `.html` target. |
+| `notes.qmd.backup` | The suffix does not end the path. |
+
+: Links the filter does not rewrite. {.striped .hover tbl-colwidths="[38,62]"}
+
+Both [Quarto](https://quarto.org) and [this page's own heading](#rewriting-rules) are written above, and both read the same in the preview as they do here.
+
+## Turning it off
+
+```yaml
+extensions:
+  portable-links:
+    enabled: false
+```
+
+Every link is then left as written, in every format.
+
+## Source
+
+The repository ships a short, standalone starting point you can copy: [`example.qmd`](https://github.com/mcanouil/quarto-portable-links/blob/main/example.qmd).

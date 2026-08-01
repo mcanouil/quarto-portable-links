@@ -1,5 +1,7 @@
 _site/
-index.qmd
+# Anchored: the rendered example at the root only. Unanchored, this also
+# matched docs/index.qmd, the documentation website's home page.
+/index.qmd
 docs/_site/
 docs/_variables.yml
 docs/_changelog-content.md

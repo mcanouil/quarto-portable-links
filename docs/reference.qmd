@@ -1,0 +1,93 @@
+---
+title: "Reference"
+subtitle: "Every rule the portable-links extension applies."
+description: "The complete portable-links behaviour: the required site-url, which links qualify, how they are normalised, and which formats are affected."
+---
+
+## Enabling the filter
+
+```yaml
+filters:
+  - portable-links
+```
+
+## The site URL
+
+```yaml
+website:
+  site-url: "https://example.com/my-site"
+```
+
+The filter builds every absolute link from this value, so it is required.
+It belongs under `website` or `book` in `_quarto.yml` or `_quarto.yaml`, which is where a project keeps it.
+
+Quarto hides the project's `website` and `book` blocks from Lua filters, so the filter reads the value from the render information Quarto passes alongside them.
+A `website` or `book` block in a single document's own front matter is read as a fallback, which covers a document rendered outside a project.
+
+When neither carries a `site-url`, the filter warns and leaves every link unchanged.
+
+## Options
+
+```yaml
+extensions:
+  portable-links:
+    enabled: false
+```
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `enabled` | boolean | `true` | Whether links are rewritten at all. |
+
+: Document and project options. {.striped .hover tbl-colwidths="[15,13,12,60]"}
+
+## Rewriting rules
+
+A link is rewritten when all of these hold:
+
+- its target ends in `.qmd` or `.html`, optionally followed by `#fragment` or `?query`;
+- it is relative, so it carries no scheme such as `https:` or `mailto:`, and is not a protocol-relative `//host` URL;
+- it is not a pure in-page anchor such as `#section`.
+
+Rewriting then:
+
+- replaces a `.qmd` suffix with `.html`;
+- strips a leading `./` or `/`;
+- joins the result to `site-url`;
+- keeps any `#fragment` or `?query` intact.
+
+| Written | Becomes |
+| --- | --- |
+| `methods.qmd` | `https://example.com/my-site/methods.html` |
+| `./methods.qmd` | `https://example.com/my-site/methods.html` |
+| `/methods.qmd` | `https://example.com/my-site/methods.html` |
+| `../other/methods.qmd` | `https://example.com/my-site/../other/methods.html` |
+| `appendix.html#notes` | `https://example.com/my-site/appendix.html#notes` |
+| `search.html?q=term` | `https://example.com/my-site/search.html?q=term` |
+| `#section` | unchanged |
+| `https://quarto.org` | unchanged |
+| `mailto:someone@example.com` | unchanged |
+| `data.csv` | unchanged |
+| `notes.qmd.backup` | unchanged |
+
+: What each form becomes. {.striped .hover tbl-colwidths="[38,62]"}
+
+## Format support
+
+| Rewritten | Left alone |
+| --- | --- |
+| PDF, LaTeX, Typst, Word, PowerPoint, and other non-HTML formats. | Plain HTML. |
+| `revealjs`, `slidy`, `s5`, `dzslides`, `slideous`. | Format extensions built on the `html` base format. |
+| | `epub`. |
+
+: Which formats the filter touches. {.striped .hover tbl-colwidths="[50,50]"}
+
+The formats left alone are the ones where a relative cross-page link already resolves.
+The HTML slide formats are rewritten despite being HTML, because a deck is a single self-contained file with no sibling pages to link to.
+
+## Limitations
+
+- A project `site-url` is required. Without it the filter warns and does nothing.
+- Only `.qmd` and `.html` targets are rewritten, so a link to a data file or an image is left as written.
+- The suffix must end the path: `notes.qmd.backup` is not a cross-page link and is not rewritten.
+- A leading `/` is treated as relative to `site-url`, not to the host, so a link to another site on the same domain is rewritten into this one.
+- A `../` segment is carried into the URL rather than resolved, and the reader's browser resolves it against `site-url`.
