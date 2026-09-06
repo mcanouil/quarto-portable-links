@@ -17,7 +17,7 @@
 --- Extension name constant
 local EXTENSION_NAME = 'portable-links'
 
-local log = require(quarto.utils.resolve_path('_modules/logging.lua'):gsub('%.lua$', ''))
+local log = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/logging.lua'):gsub('%.lua$', ''))
 local slide_formats = require(quarto.utils.resolve_path('_modules/slide-formats.lua'):gsub('%.lua$', ''))
 
 -- ============================================================================
