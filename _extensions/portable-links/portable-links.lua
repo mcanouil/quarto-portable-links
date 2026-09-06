@@ -17,8 +17,25 @@
 --- Extension name constant
 local EXTENSION_NAME = 'portable-links'
 
-local log = require(quarto.utils.resolve_path('_modules/logging.lua'):gsub('%.lua$', ''))
+local log = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/logging.lua'):gsub('%.lua$', ''))
 local slide_formats = require(quarto.utils.resolve_path('_modules/slide-formats.lua'):gsub('%.lua$', ''))
+local schema = require(quarto.utils.resolve_path('_vendor/quarto-wizard/schema.lua'):gsub('%.lua$', ''))
+local check = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/schema-check.lua'):gsub('%.lua$', ''))
+
+--- The schema check, built once and reused by every document in the render. It
+--- reads `_schema.yml` on the way in and checks the document configuration
+--- once.
+---
+--- The validator is injected rather than required by the check module, so the
+--- two vendored sources stay independent of where the other was placed.
+---
+--- The extension contributes a filter and no shortcode, so the check runs from
+--- the `Meta` handler, which is the first place the document configuration is
+--- available.
+---
+--- A schema that cannot be read is reported by the module as an error and the
+--- render carries on: a configuration file must not stop a document.
+local checker = check.new(schema, EXTENSION_NAME)
 
 -- ============================================================================
 -- MODULE-LEVEL VARIABLES
@@ -159,6 +176,8 @@ return {
       -- Reset per-document state so a previous render in the same process
       -- does not leak its site-url into this one.
       site_url = nil
+
+      checker:options(meta)
 
       if is_disabled(meta) then return nil end
       if quarto.doc.is_format('html') and not is_html_slides() then return nil end
