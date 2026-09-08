@@ -22,9 +22,10 @@ local slide_formats = require(quarto.utils.resolve_path('_modules/slide-formats.
 local schema = require(quarto.utils.resolve_path('_vendor/quarto-wizard/schema.lua'):gsub('%.lua$', ''))
 local check = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/schema-check.lua'):gsub('%.lua$', ''))
 
---- The schema check, built once and reused by every document in the render. It
---- reads `_schema.yml` on the way in and checks the document configuration
---- once.
+--- The schema check, built once for the document. It reads `_schema.yml` on
+--- the way in and checks the document configuration once.
+--- Quarto gives each document its own Lua state, so nothing built here
+--- carries into the next document of a project render.
 ---
 --- The validator is injected rather than required by the check module, so the
 --- two vendored sources stay independent of where the other was placed.
