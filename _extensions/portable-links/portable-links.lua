@@ -50,14 +50,13 @@ local site_url = nil
 -- ============================================================================
 
 --- Check whether the filter is disabled via extensions.portable-links.enabled.
---- @param meta table The document metadata table
+--- The value comes from the schema rather than from the document text, so
+--- every spelling the schema accepts for false disables the filter. Reading the
+--- document meant `enabled: no` left it running.
+--- It must be called after `checker:options`, which resolves the value.
 --- @return boolean True if the filter is explicitly disabled
-local function is_disabled(meta)
-  local config = meta['extensions'] and meta['extensions'][EXTENSION_NAME]
-  if not config or config['enabled'] == nil then
-    return false
-  end
-  return pandoc.utils.stringify(config['enabled']) == 'false'
+local function is_disabled()
+  return checker:option('enabled') == false
 end
 
 --- Check whether the current output is an HTML-based slide format.
@@ -180,7 +179,7 @@ return {
 
       checker:options(meta)
 
-      if is_disabled(meta) then return nil end
+      if is_disabled() then return nil end
       if quarto.doc.is_format('html') and not is_html_slides() then return nil end
 
       local execute_info_url, parse_error = get_site_url_from_execute_info()
