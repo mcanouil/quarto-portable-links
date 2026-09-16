@@ -177,10 +177,11 @@ return {
       -- does not leak its site-url into this one.
       site_url = nil
 
+      if quarto.doc.is_format('html') and not is_html_slides() then return nil end
+
       checker:options(meta)
 
       if is_disabled() then return nil end
-      if quarto.doc.is_format('html') and not is_html_slides() then return nil end
 
       local execute_info_url, parse_error = get_site_url_from_execute_info()
       if parse_error then
