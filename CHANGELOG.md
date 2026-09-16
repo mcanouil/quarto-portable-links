@@ -5,6 +5,7 @@
 ### Bug Fixes
 
 - fix: Read the `enabled` option through the schema, so a value that is not a boolean is reported rather than ignored. Comparing the document text meant `enabled: no` left the filter rewriting links and said nothing; it is now named as a type error. (#25)
+- fix: Gate the options check on the acting format union so plain HTML and epub stay silent. (#25)
 
 ### Documentation
 
