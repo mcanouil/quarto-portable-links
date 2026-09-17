@@ -6,6 +6,7 @@
 
 - fix: Read the `enabled` option through the schema, so a value that is not a boolean is reported rather than ignored. Comparing the document text meant `enabled: no` left the filter rewriting links and said nothing; it is now named as a type error. (#25)
 - fix: Gate the options check on the acting format union so plain HTML and epub stay silent. (#25)
+- fix: Report a key nested inside an option as a warning rather than an error, so one nested typo does not invalidate the whole configuration. This matches how the extension already reports an unknown key at the top of its own block. (#25)
 
 ### Documentation
 
@@ -15,7 +16,7 @@
 
 - build: Update the vendored Lua modules to 2.3.0, which includes the `schema-check` fix for an extension whose entry points are in a subdirectory. A module no longer carries a version line in its header, so its checksum changes only when its code changes. (#22)
 - build: Fetch the schema validator from a Quarto Wizard release asset rather than a raw path inside its repository, which a refactor could move without notice. The vendored file is unchanged. (#24)
-- build: Update the vendored Lua modules to 2.5.0, which adds the accessor that reads what the schema resolves an option to. The schema validator moves to its own release train and is pinned at `schema-v2.1.0`, which accepts only `true` and `false` as a boolean. (#25)
+- build: Update the vendored Lua modules to 2.5.0, which adds the accessor that reads what the schema resolves an option to. The schema validator moves to its own release train and is pinned at `schema-v2.2.0`, which accepts only `true` and `false` as a boolean. (#25)
 
 ## 0.3.0 (2026-09-07)
 
