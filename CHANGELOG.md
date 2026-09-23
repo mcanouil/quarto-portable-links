@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.3.1 (2026-09-23)
+
 ### Bug Fixes
 
 - fix: Read the `enabled` option through the schema, so a value that is not a boolean is reported rather than ignored. Comparing the document text meant `enabled: no` left the filter rewriting links and said nothing; it is now named as a type error. (#25)
