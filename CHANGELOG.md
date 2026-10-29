@@ -5,6 +5,7 @@
 ### Refactoring
 
 - build: Update the vendored Lua modules to 2.7.0 and read the project metadata through their shared helper. Nothing changes for users. (#28)
+- build: Update the vendored schema validator to `schema-v2.3.0`, which adds checks for cell options. Nothing changes for users. (#29)
 
 ## 0.3.1 (2026-09-23)
 
