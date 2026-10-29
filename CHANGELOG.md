@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Refactoring
+
+- build: Update the vendored Lua modules to 2.7.0 and read the project metadata through their shared helper. Nothing changes for users. (#28)
+
 ## 0.3.1 (2026-09-23)
 
 ### Bug Fixes

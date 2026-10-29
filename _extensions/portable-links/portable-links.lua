@@ -18,6 +18,7 @@
 local EXTENSION_NAME = 'portable-links'
 
 local log = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/logging.lua'):gsub('%.lua$', ''))
+local metadata = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/metadata.lua'):gsub('%.lua$', ''))
 local slide_formats = require(quarto.utils.resolve_path('_modules/slide-formats.lua'):gsub('%.lua$', ''))
 local schema = require(quarto.utils.resolve_path('_vendor/quarto-wizard/schema.lua'):gsub('%.lua$', ''))
 local check = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/schema-check.lua'):gsub('%.lua$', ''))
@@ -77,32 +78,28 @@ end
 --- document Meta passed to Lua filters.
 --- Returns a second value only when QUARTO_EXECUTE_INFO was present but
 --- could not be read or parsed, so the caller can warn before falling
---- back to document metadata. Absent or empty files fall back silently.
+--- back to document metadata. Absent or empty files, and files without
+--- a format.metadata table, fall back silently.
 --- @return string|nil value The site-url value, or nil if unavailable
 --- @return string|nil parse_error A human-readable reason when the file
----   existed but could not be parsed, otherwise nil
+---   existed but could not be read or parsed, otherwise nil
 local function get_site_url_from_execute_info()
-  local path = os.getenv('QUARTO_EXECUTE_INFO')
-  if not path then return nil end
+  local format_meta, reason = metadata.get_project_metadata()
+  if not format_meta then
+    if reason == 'file is unreadable' or reason == 'invalid JSON' then
+      return nil, reason
+    end
+    return nil
+  end
 
-  local file = io.open(path, 'r')
-  if not file then return nil, 'file is unreadable' end
+  local website = format_meta['website']
+  if type(website) == 'table' and website['site-url'] then
+    return website['site-url']
+  end
 
-  local content = file:read('*a')
-  file:close()
-
-  if not content or content == '' then return nil end
-
-  local ok, info = pcall(quarto.json.decode, content)
-  if not ok or not info then return nil, 'invalid JSON' end
-
-  local format_meta = info['format'] and info['format']['metadata']
-  if not format_meta then return nil end
-
-  if format_meta['website'] and format_meta['website']['site-url'] then
-    return format_meta['website']['site-url']
-  elseif format_meta['book'] and format_meta['book']['site-url'] then
-    return format_meta['book']['site-url']
+  local book = format_meta['book']
+  if type(book) == 'table' and book['site-url'] then
+    return book['site-url']
   end
 
   return nil
