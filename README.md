@@ -9,7 +9,7 @@ This filter rewrites them to absolute URLs built from the project's `site-url`.
 ## Installation
 
 ```bash
-quarto add mcanouil/quarto-portable-links@0.3.1
+quarto add mcanouil/quarto-portable-links@0.3.2
 ```
 
 This will install the extension under the `_extensions` subdirectory.
