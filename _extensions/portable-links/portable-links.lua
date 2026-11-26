@@ -18,7 +18,7 @@
 local EXTENSION_NAME = 'portable-links'
 
 local log = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/logging.lua'):gsub('%.lua$', ''))
-local metadata = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/metadata.lua'):gsub('%.lua$', ''))
+local engine = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/engine.lua'):gsub('%.lua$', ''))
 local slide_formats = require(quarto.utils.resolve_path('_modules/slide-formats.lua'):gsub('%.lua$', ''))
 local schema = require(quarto.utils.resolve_path('_vendor/quarto-wizard/schema.lua'):gsub('%.lua$', ''))
 local check = require(quarto.utils.resolve_path('_vendor/quarto-lua-modules/schema-check.lua'):gsub('%.lua$', ''))
@@ -69,40 +69,6 @@ local function is_html_slides()
     if quarto.doc.is_format(name) then return true end
   end
   return false
-end
-
---- Read site-url from QUARTO_EXECUTE_INFO project metadata.
---- Tries website.site-url first, then book.site-url.
---- Workaround for https://github.com/quarto-dev/quarto-cli/issues/13029
---- where project-level metadata (website/book) is not available in the
---- document Meta passed to Lua filters.
---- Returns a second value only when QUARTO_EXECUTE_INFO was present but
---- could not be read or parsed, so the caller can warn before falling
---- back to document metadata. Absent or empty files, and files without
---- a format.metadata table, fall back silently.
---- @return string|nil value The site-url value, or nil if unavailable
---- @return string|nil parse_error A human-readable reason when the file
----   existed but could not be read or parsed, otherwise nil
-local function get_site_url_from_execute_info()
-  local format_meta, reason = metadata.get_project_metadata()
-  if not format_meta then
-    if reason == 'file is unreadable' or reason == 'invalid JSON' then
-      return nil, reason
-    end
-    return nil
-  end
-
-  local website = format_meta['website']
-  if type(website) == 'table' and website['site-url'] then
-    return website['site-url']
-  end
-
-  local book = format_meta['book']
-  if type(book) == 'table' and book['site-url'] then
-    return book['site-url']
-  end
-
-  return nil
 end
 
 --- Read site-url from document metadata as a fallback.
@@ -180,7 +146,10 @@ return {
 
       if is_disabled() then return nil end
 
-      local execute_info_url, parse_error = get_site_url_from_execute_info()
+      -- engine reads site-url on Quarto 1 (QUARTO_EXECUTE_INFO) and Quarto 2
+      -- (document metadata) alike.
+      local project_url, reason = engine.project_site_url(meta)
+      local parse_error = (reason == 'file is unreadable' or reason == 'invalid JSON') and reason or nil
       if parse_error then
         log.log_warning(
           EXTENSION_NAME,
@@ -188,7 +157,7 @@ return {
             "); falling back to document metadata for site-url."
         )
       end
-      site_url = execute_info_url or get_site_url_from_meta(meta)
+      site_url = project_url or get_site_url_from_meta(meta)
 
       if not site_url then
         log.log_warning(
